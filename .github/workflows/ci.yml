@@ -1,0 +1,64 @@
+name: Validación de SGV-Comercial
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: sgv-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  backend:
+    name: Backend y SQL Server
+    runs-on: ubuntu-latest
+    services:
+      sql:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: Y
+          MSSQL_SA_PASSWORD: ${{ secrets.SGV_SQL_TEST_PASSWORD }}
+        ports: [1433:1433]
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '${{ secrets.SGV_SQL_TEST_PASSWORD }}' -C -Q 'SELECT 1'"
+          --health-interval 10s --health-timeout 5s --health-retries 15
+    env:
+      SGV_TEST_SQL: Server=localhost,1433;User Id=sa;Password=${{ secrets.SGV_SQL_TEST_PASSWORD }};Encrypt=True;TrustServerCertificate=True
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: '8.0.x' }
+      - name: Compilar
+        run: dotnet build tests/SGV.Tests/SGV.Tests.csproj --configuration Release
+      - name: Pruebas unitarias y SQL Server
+        run: dotnet test tests/SGV.Tests/SGV.Tests.csproj --configuration Release --no-build --logger trx --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-test-results
+          path: tests/SGV.Tests/TestResults/
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run: { working-directory: frontend }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-test-results
+          path: |
+            frontend/coverage/
+            frontend/playwright-report/
