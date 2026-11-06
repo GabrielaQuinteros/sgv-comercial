@@ -9,7 +9,7 @@
 - Resultado de CI:
 - Análisis de calidad:
 
-## Revisión
-- [ ] Revisión de otro integrante aprobada
-- [ ] Validaciones automatizadas correctas
+## Verificación e integración
+- [ ] Pruebas de backend, SQL Server y frontend correctas
+- [ ] Umbral de calidad de SonarQube Cloud superado
 - [ ] Sin credenciales ni certificados en el cambio

@@ -84,7 +84,8 @@ Los resultados y la cobertura se publican como artefactos en Actions. Las métri
 
 - `main`: versión estable.
 - `feature/SGV-<n>-<descripcion>`: implementación por historia.
-- Cada Pull Request requiere validaciones automatizadas correctas y revisión de otro integrante antes de fusionarse.
+- Cada Pull Request requiere las verificaciones de Backend y SQL Server, Frontend y SonarQube Cloud correctas antes de fusionarse.
+- La integración se administra desde la cuenta responsable del repositorio; las pruebas y el análisis de calidad son obligatorios.
 
 ## Trazabilidad
 
