@@ -46,9 +46,31 @@ jobs:
           dotnet tool install --global dotnet-sonarscanner --version 12.1.0
           dotnet sonarscanner begin /k:"GabrielaQuinteros_sgv-comercial" /o:"gabrielaquinteros" /v:"0.1.0" /d:sonar.token="$SONAR_TOKEN" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="tests/SGV.Tests/TestResults/**/coverage.opencover.xml" /d:sonar.javascript.lcov.reportPaths="frontend/coverage/lcov.info" /d:sonar.exclusions="**/node_modules/**,**/dist/**,**/bin/**,**/obj/**"
       - name: Compilar
-        run: dotnet build tests/SGV.Tests/SGV.Tests.csproj --configuration Release
+        run: dotnet build SGV-Comercial.sln --configuration Release
       - name: Pruebas unitarias y SQL Server
         run: dotnet test tests/SGV.Tests/SGV.Tests.csproj --configuration Release --no-build --logger trx --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+      - name: Configurar servicios para la prueba de emisión integrada
+        shell: bash
+        run: |
+          for name in SGV_JWT_KEY SGV_ADMIN_PASSWORD DTE_SERVICE_KEY DTE_CERTIFICATE_PASSWORD; do
+            value="Q!$(openssl rand -hex 24)"
+            printf '::add-mask::%s\n' "$value"
+            printf '%s=%s\n' "$name" "$value" >> "$GITHUB_ENV"
+          done
+          printf 'ConnectionStrings__Sgv=Server=localhost,1433;Database=SgvDemo;User Id=sa;Password=%s;Encrypt=True;TrustServerCertificate=True\n' '${{ secrets.SGV_SQL_TEST_PASSWORD }}' >> "$GITHUB_ENV"
+          printf 'DTE_CERTIFICATE_PATH=%s/.local/certificates/firma.p12\nDTE_PUBLIC_CERTIFICATE_PATH=%s/.local/certificates/public.cer\n' "$GITHUB_WORKSPACE" "$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
+      - name: Iniciar API, firma y receptor de pruebas
+        run: |
+          dotnet tools/SGV.DemoSetup/bin/Release/net8.0/SGV.DemoSetup.dll certificates .local/certificates
+          dotnet tools/SGV.DemoSetup/bin/Release/net8.0/SGV.DemoSetup.dll migrate
+          bash scripts/start-fiscal-services.sh
+      - name: Navegador integrado de facturación
+        env:
+          SGV_E2E_FULLSTACK: "1"
+          SGV_E2E_PASSWORD: ${{ env.SGV_ADMIN_PASSWORD }}
+        run: |
+          ./node_modules/.bin/playwright install --with-deps chromium
+          npm run test:e2e
       - name: Publicar análisis de calidad
         if: env.SONAR_TOKEN != ''
         run: dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
@@ -57,6 +79,13 @@ jobs:
         with:
           name: backend-test-results
           path: tests/SGV.Tests/TestResults/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fiscal-fullstack-evidence
+          path: |
+            frontend/playwright-report/
+            .local/logs/
   frontend:
     name: Frontend
     runs-on: ubuntu-latest

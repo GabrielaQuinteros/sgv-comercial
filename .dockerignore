@@ -1,0 +1,15 @@
+.git
+.local
+**/node_modules
+**/bin
+**/obj
+**/coverage
+**/TestResults
+**/dist
+**/playwright-report
+**/test-results
+**/*.p12
+**/*.pfx
+**/*.key
+**/*.pem
+.env*

@@ -137,7 +137,7 @@ public sealed partial class CommercialStore(string connectionString)
     public async Task<Dashboard> DashboardAsync(CancellationToken cancellation)
     {
         await using var connection = await OpenAsync(cancellation);
-        await using var command = new SqlCommand("SELECT (SELECT COUNT(*) FROM dbo.Products), (SELECT COUNT(*) FROM dbo.Products WHERE Stock<=MinimumStock), (SELECT COUNT(*) FROM dbo.Sales), (SELECT COALESCE(SUM(Total),0) FROM dbo.Sales WHERE Status='Pagada')", connection);
+        await using var command = new SqlCommand("SELECT (SELECT COUNT(*) FROM dbo.Products), (SELECT COUNT(*) FROM dbo.Products WHERE Stock<=MinimumStock), (SELECT COUNT(*) FROM dbo.Sales), (SELECT COALESCE(SUM(Total),0) FROM dbo.Sales WHERE Status IN('Pagada','Facturada'))", connection);
         await using var reader = await command.ExecuteReaderAsync(cancellation);
         await reader.ReadAsync(cancellation);
         return new Dashboard(reader.GetInt32(0), reader.GetInt32(1), reader.GetInt32(2), reader.GetDecimal(3));

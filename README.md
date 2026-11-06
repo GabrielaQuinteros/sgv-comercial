@@ -92,3 +92,14 @@ Los resultados y la cobertura se publican como artefactos en Actions. Las métri
 Las referencias funcionales SGV-1 a SGV-44 aparecen en los títulos de Jira. El espacio utiliza claves internas SCRUM: por ejemplo, **SGV-33 → [SCRUM-203](https://practicaprofesional02.atlassian.net/browse/SCRUM-203)**.
 
 [Product Backlog](https://practicaprofesional02.atlassian.net/issues/?filter=10066) · [Documentación técnica](docs/arquitectura.md)
+
+## Facturación electrónica de principio a fin
+
+Factura 01, CCF 03 y Nota de Crédito 05, firma JWS, receptor propio de pruebas, persistencia, contingencia y reenvío, invalidación, comprobante con QR, consulta e indicadores.
+
+```bash
+bash scripts/demo.sh up
+bash scripts/demo.sh credentials
+```
+
+Abrir `http://localhost:5173`. [Proceso, diagrama de secuencia y demostración de tres minutos](docs/proceso-facturacion-electronica.md).

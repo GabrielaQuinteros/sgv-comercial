@@ -17,7 +17,7 @@ public static class AuditCsv
         return Encoding.UTF8.GetBytes(csv.ToString());
     }
 
-    private static string Escape(string value)
+    public static string Escape(string value)
     {
         var trimmed = value.TrimStart();
         if (trimmed.Length > 0 && "=+-@".Contains(trimmed[0], StringComparison.Ordinal)) value = "'" + value;

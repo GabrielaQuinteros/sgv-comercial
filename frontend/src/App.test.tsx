@@ -8,6 +8,9 @@ import {
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { App } from "./App";
 import { request } from "./lib/api";
+vi.mock("./components/Facturacion", () => ({
+  Facturacion: () => <h2>Documentos tributarios electrónicos</h2>,
+}));
 
 vi.mock("./lib/api", async () => ({
   ...(await vi.importActual<typeof import("./lib/api")>("./lib/api")),
@@ -96,9 +99,7 @@ it("registra una venta y confirma el pago desde la interfaz", async () => {
     target: { value: "2" },
   });
   fireEvent.click(screen.getByRole("button", { name: "Añadir" }));
-  fireEvent.click(
-    screen.getByRole("button", { name: "Guardar venta" }),
-  );
+  fireEvent.click(screen.getByRole("button", { name: "Guardar venta" }));
   await screen.findByRole("heading", { name: /Registrar pago/ });
   fireEvent.change(screen.getByLabelText("Referencia del pago"), {
     target: { value: "PAY-001" },
@@ -115,9 +116,7 @@ it("registra una venta y confirma el pago desde la interfaz", async () => {
 
 it("opera inventario, auditoría, firma y cierre de sesión", async () => {
   await login();
-  fireEvent.click(
-    screen.getByRole("button", { name: "Inventario" }),
-  );
+  fireEvent.click(screen.getByRole("button", { name: "Inventario" }));
   fireEvent.change(screen.getByLabelText("Buscar producto"), {
     target: { value: "AW-001" },
   });
@@ -134,35 +133,23 @@ it("opera inventario, auditoría, firma y cierre de sesión", async () => {
     quantity: 3,
     reference: "REC-001",
   });
-  fireEvent.click(
-    screen.getByRole("button", { name: "Auditoría" }),
-  );
+  fireEvent.click(screen.getByRole("button", { name: "Auditoría" }));
   fireEvent.change(screen.getByLabelText("Desde", { exact: true }), {
     target: { value: "2026-11-06T09:00" },
   });
   fireEvent.change(screen.getByLabelText("Hasta", { exact: true }), {
     target: { value: "2026-11-06T18:00" },
   });
-  fireEvent.click(
-    screen.getByRole("button", { name: "Consultar" }),
-  );
+  fireEvent.click(screen.getByRole("button", { name: "Consultar" }));
   await screen.findByText("Venta creada");
   fireEvent.click(
-    screen.getByRole("button", { name: "Facturación DTE" }),
+    screen.getByRole("button", { name: "Facturación electrónica" }),
   );
-  fireEvent.change(screen.getByLabelText("Identificador de venta"), {
-    target: { value: sale.id },
-  });
-  fireEvent.change(screen.getByLabelText("Total USD"), {
-    target: { value: "113" },
-  });
-  fireEvent.click(screen.getByRole("button", { name: "Generar y firmar" }));
-  await screen.findByText("Documento firmado: document-001");
-  expect(request).toHaveBeenCalledWith("/dte/sign", "session", {
-    saleId: sale.id,
-    total: 113,
-    currency: "USD",
-  });
+  expect(
+    await screen.findByRole("heading", {
+      name: "Documentos tributarios electrónicos",
+    }),
+  ).toBeTruthy();
   fireEvent.click(screen.getByRole("button", { name: "Cerrar sesión" }));
   await screen.findByRole("heading", { name: "Iniciar sesión" });
   expect(screen.getByRole("heading", { name: "Iniciar sesión" })).toBeTruthy();

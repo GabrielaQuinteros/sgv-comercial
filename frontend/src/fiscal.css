@@ -1,0 +1,264 @@
+.billing-heading {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  margin-bottom: 22px;
+}
+.environment-badge {
+  display: inline-block;
+  border: 1px solid #c8e6e0;
+  border-radius: 20px;
+  background: #edf8f5;
+  color: #237564;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 12px;
+}
+.fiscal-metrics {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.fiscal-metrics .metric strong {
+  font-size: 26px;
+}
+.fiscal-status {
+  display: inline-block;
+  font-size: 10px;
+  letter-spacing: 0.4px;
+  border-radius: 5px;
+  padding: 5px 8px;
+  font-weight: 700;
+  white-space: nowrap;
+  background: #edf1f5;
+  color: #5c7080;
+}
+.state-procesado {
+  background: #e1f5eb;
+  color: #14774e;
+}
+.state-rechazado {
+  background: #fff0ed;
+  color: #b34c35;
+}
+.state-contingencia {
+  background: #fff5db;
+  color: #9d731a;
+}
+.state-invalidado {
+  background: #eae8ef;
+  color: #66567e;
+}
+.fiscal-timeline {
+  list-style: none;
+  display: flex;
+  gap: 12px;
+  padding: 18px 0;
+  overflow-x: auto;
+}
+.fiscal-timeline li {
+  border-left: 3px solid #17987f;
+  padding: 5px 15px;
+  min-width: 150px;
+  flex: 1;
+}
+.fiscal-timeline strong {
+  display: block;
+  font-size: 11px;
+}
+.fiscal-timeline time {
+  display: block;
+  font-size: 11px;
+  color: #648071;
+  margin: 5px 0;
+}
+.fiscal-identifiers {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 12px;
+  font-size: 12px;
+}
+.fiscal-identifiers dt {
+  color: #778a96;
+}
+.fiscal-identifiers dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.mono {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.fiscal-json {
+  padding: 20px;
+  border: 1px solid #dce6eb;
+  border-radius: 8px;
+  background: #f6f9fb;
+  max-height: 480px;
+  overflow: auto;
+  font-size: 11px;
+  line-height: 1.6;
+}
+details {
+  margin: 18px 0;
+}
+summary {
+  cursor: pointer;
+  color: #2a5f71;
+  font-weight: 600;
+  font-size: 12px;
+}
+.billing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 18px 0;
+}
+.fiscal-observations {
+  color: #a74c35;
+  padding-left: 20px;
+  font-size: 12px;
+}
+.rejection-reasons {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.rejection-reasons h2 {
+  font-size: 13px;
+  margin: 0;
+}
+.rejection-reasons span {
+  font-size: 10px;
+  color: #926c55;
+  background: #fff5ed;
+  padding: 7px 10px;
+  border-radius: 5px;
+}
+.rejection-reasons b {
+  margin-left: 8px;
+}
+.receiver-message {
+  font-size: 12px;
+}
+.fiscal-receipt {
+  background: white;
+  padding: 30px;
+  border: 1px solid #d4dfe5;
+  margin-top: 20px;
+  color: #203d4b;
+}
+.fiscal-receipt header {
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+  border-bottom: 2px solid #198c75;
+  margin-bottom: 22px;
+}
+.fiscal-receipt p {
+  font-size: 11px;
+}
+.fiscal-receipt h2 {
+  font-size: 23px;
+}
+.receipt-totals {
+  text-align: right;
+  margin: 24px 0;
+}
+.receipt-verification {
+  display: flex;
+  gap: 25px;
+  align-items: center;
+  border-top: 1px solid #dbe5e9;
+  padding-top: 20px;
+}
+.receipt-verification a {
+  font-size: 11px;
+}
+.public-consultation {
+  max-width: 850px;
+  margin: 60px auto;
+  padding: 20px;
+}
+.public-consultation dl {
+  display: grid;
+  grid-template-columns: 170px 1fr;
+  gap: 14px;
+}
+.public-consultation dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 1100px) {
+  .fiscal-metrics {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 700px) {
+  .fiscal-metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .billing-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .fiscal-identifiers {
+    grid-template-columns: 1fr;
+  }
+  .fiscal-receipt header {
+    display: block;
+  }
+  .fiscal-receipt {
+    padding: 15px;
+  }
+  .receipt-verification {
+    flex-wrap: wrap;
+  }
+  .public-consultation dl {
+    display: block;
+  }
+  .public-consultation dt {
+    margin-top: 20px;
+  }
+}
+@media print {
+  body {
+    background: white;
+  }
+  .sidebar,
+  .topbar,
+  .page-heading,
+  .billing-module > *:not(.billing-detail),
+  .billing-detail > *:not(.print-region),
+  .no-print,
+  .content > main > footer {
+    display: none !important;
+  }
+  .content {
+    margin: 0;
+  }
+  .content main,
+  .billing-detail {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .fiscal-receipt {
+    border: 0;
+    padding: 10mm;
+  }
+  .fiscal-receipt a {
+    color: black;
+    text-decoration: none;
+  }
+  .print-region {
+    display: block !important;
+  }
+  button {
+    display: none !important;
+  }
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+}

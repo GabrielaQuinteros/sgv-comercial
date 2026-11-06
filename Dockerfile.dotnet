@@ -1,0 +1,17 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+COPY Directory.Build.props ./
+COPY backend/ backend/
+COPY dte-service/ dte-service/
+COPY database/ database/
+COPY tools/ tools/
+ARG PROJECT
+RUN dotnet publish "$PROJECT" --configuration Release --output /publish --no-self-contained
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+WORKDIR /app
+COPY --from=build /publish ./
+ARG ASSEMBLY
+ENV APP_DLL=$ASSEMBLY
+ENV ASPNETCORE_URLS=http://+:8080
+USER app
+ENTRYPOINT ["/bin/sh", "-c", "exec dotnet \"$APP_DLL\" \"$@\"", "--"]

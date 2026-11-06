@@ -16,7 +16,11 @@
     "@playwright/test": "1.65.0"
   },
   "optionalDependencies": {
+    "@rolldown/binding-linux-arm64-musl": "1.2.16",
     "@rolldown/binding-linux-x64-gnu": "1.2.16",
-    "lightningcss-linux-x64-gnu": "1.33.0"
+    "@rolldown/binding-linux-x64-musl": "1.2.16",
+    "lightningcss-linux-arm64-musl": "1.33.0",
+    "lightningcss-linux-x64-gnu": "1.33.0",
+    "lightningcss-linux-x64-musl": "1.33.0"
   }
 }

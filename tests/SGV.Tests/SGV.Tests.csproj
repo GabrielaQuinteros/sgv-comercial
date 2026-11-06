@@ -11,9 +11,12 @@
     <PackageReference Include="coverlet.collector" Version="6.0.4"><PrivateAssets>all</PrivateAssets></PackageReference>
     <ProjectReference Include="../../backend/SGV.Api/SGV.Api.csproj" />
     <ProjectReference Include="../../dte-service/SGV.Dte/SGV.Dte.csproj" />
+    <ProjectReference Include="../../dte-service/SGV.ReceptorPruebas/SGV.ReceptorPruebas.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Include="../../database/001_schema.sql" Link="schema.sql" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../../database/002_catalog.sql" Link="catalog.sql" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../database/003_facturacion.sql" Link="fiscal.sql" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../database/004_ventas_pruebas.sql" Link="sales-seed.sql" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
