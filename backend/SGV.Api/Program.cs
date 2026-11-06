@@ -92,6 +92,14 @@ api.MapPost("/dte/sign", async (DteSignInput input, IHttpClientFactory clients, 
     var document = await response.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>(cancellation);
     return Results.Json(document, statusCode: (int)response.StatusCode);
 }).RequireAuthorization("Ventas");
+api.MapPost("/dte/submit", async (System.Text.Json.JsonElement document, ClaimsPrincipal user, CommercialStore store, IHttpClientFactory clients, CancellationToken cancellation) =>
+{
+    using var response = await clients.CreateClient("dte").PostAsJsonAsync("/api/dte/submit", document, cancellation);
+    var receipt = await response.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>(cancellation);
+    if (response.IsSuccessStatusCode)
+        await store.AuditAsync(user.Identity!.Name!, "DTE enviado", document.GetProperty("id").GetString() ?? "", "Recepción confirmada por la pasarela configurada", cancellation);
+    return Results.Json(receipt, statusCode: (int)response.StatusCode);
+}).RequireAuthorization("Ventas");
 
 await app.Services.GetRequiredService<CommercialStore>().EnsureAdminAsync(
     builder.Configuration["SGV_ADMIN_USERNAME"] ?? "admin",
