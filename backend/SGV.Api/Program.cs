@@ -68,9 +68,8 @@ app.MapGet("/health", () => Results.Ok(new { service = "SGV.Api", status = "ok" 
 app.MapPost("/api/auth/login", async (LoginInput input, CommercialStore store, TokenService tokens, CancellationToken cancellation) =>
 {
     if (input.Username.Length > 100 || input.Password.Length > 128) return Results.Unauthorized();
-    var account = await store.FindUserAsync(input.Username, cancellation);
-    if (account is null || !account.Active || !PasswordHasher.Verify(input.Password, account.PasswordHash)) return Results.Unauthorized();
-    await store.AuditAsync(account.Username, "Inicio de sesión", account.Id.ToString(), "Autenticación correcta", cancellation);
+    var account = await store.AuthenticateAsync(input.Username, input.Password, cancellation);
+    if (account is null) return Results.Unauthorized();
     return Results.Ok(tokens.Create(account));
 }).RequireRateLimiting("login");
 
