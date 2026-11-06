@@ -161,11 +161,12 @@ public sealed partial class CommercialStore(string connectionString)
         if (to <= from || to - from > TimeSpan.FromDays(31)) throw new BusinessException("Selecciona un rango mayor que cero y de hasta 31 días.");
         var events = new List<AuditEvent>();
         await using var connection = await OpenAsync(cancellation);
-        await using var command = new SqlCommand("SELECT TOP(10000) Id,CreatedAt,Actor,Action,EntityId,Detail FROM dbo.AuditLog WHERE CreatedAt>=@from AND CreatedAt<@to ORDER BY CreatedAt,Id", connection);
+        await using var command = new SqlCommand("SELECT TOP(10001) Id,CreatedAt,Actor,Action,EntityId,Detail FROM dbo.AuditLog WHERE CreatedAt>=@from AND CreatedAt<@to ORDER BY CreatedAt,Id", connection);
         Parameter(command, "@from", from); Parameter(command, "@to", to);
         await using var reader = await command.ExecuteReaderAsync(cancellation);
         while (await reader.ReadAsync(cancellation))
             events.Add(new AuditEvent(reader.GetInt64(0), reader.GetFieldValue<DateTimeOffset>(1), reader.GetString(2), reader.GetString(3), reader.GetString(4), reader.GetString(5)));
+        if (events.Count > 10_000) throw new BusinessException("La consulta supera 10000 eventos. Reduce el rango para exportar la bitácora completa.", 413);
         return events;
     }
 }

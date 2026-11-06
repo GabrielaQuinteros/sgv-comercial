@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { downloadAudit } from "./lib/download";
 import {
   calculateCart,
   currency,
@@ -440,7 +441,9 @@ export function App() {
                       required
                     />
                   </label>
-                  <button type="submit" className="secondary">Añadir</button>
+                  <button type="submit" className="secondary">
+                    Añadir
+                  </button>
                 </form>
                 <table>
                   <thead>
@@ -563,6 +566,25 @@ export function App() {
                 </label>
                 <button type="submit" className="primary" disabled={busy}>
                   Consultar
+                </button>
+                <button
+                  type="button"
+                  className="secondary"
+                  disabled={busy}
+                  onClick={(event) => {
+                    const form = event.currentTarget.form!;
+                    if (!form.reportValidity()) return;
+                    const data = new FormData(form);
+                    void run(() =>
+                      downloadAudit(
+                        String(data.get("from")),
+                        String(data.get("to")),
+                        session.accessToken,
+                      ),
+                    );
+                  }}
+                >
+                  Exportar CSV
                 </button>
               </form>
               <table>
