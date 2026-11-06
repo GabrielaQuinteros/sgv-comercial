@@ -6,10 +6,11 @@ namespace Sgv.Api.Data;
 
 public sealed partial class CommercialStore
 {
+    private static readonly string[] PaymentMethods = ["Efectivo", "Tarjeta", "Transferencia"];
     public async Task<PaymentReceipt> RecordPaymentAsync(Guid saleId, PaymentInput input, string actor, CancellationToken cancellation)
     {
         if (input.Amount <= 0 || decimal.Round(input.Amount, 2) != input.Amount ||
-            !new[] { "Efectivo", "Tarjeta", "Transferencia" }.Contains(input.Method) ||
+            !PaymentMethods.Contains(input.Method) ||
             string.IsNullOrWhiteSpace(input.Reference) || input.Reference.Length > 100)
             throw new BusinessException("Importe, método o referencia de pago inválidos.");
         await using var connection = await OpenAsync(cancellation);
