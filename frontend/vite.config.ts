@@ -13,7 +13,7 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       allowExternal: true,
-      reporter: ["text", "lcov"],
+      reporter: ["text", ["lcov", { projectRoot: fileURLToPath(new URL("..", import.meta.url)) }]],
       include: [
         "src/lib/**/*.ts",
         "src/components/**/*.tsx",

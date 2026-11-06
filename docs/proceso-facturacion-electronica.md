@@ -140,7 +140,7 @@ El comprobante muestra identificación, emisor, receptor, detalle, IVA, total y 
 
 ## Levantar la demostración con Docker
 
-Requisitos: Docker Desktop/Compose, Node.js 22 y OpenSSL. La primera construcción descarga las imágenes y dependencias; se realiza antes del recorrido de tres minutos.
+Requisitos: Docker Desktop/Compose y Node.js 22. La primera construcción descarga las imágenes y dependencias; se realiza antes del recorrido de tres minutos.
 
 ```bash
 git switch feature/SGV-38-flujo-dte-completo
