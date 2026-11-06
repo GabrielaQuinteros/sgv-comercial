@@ -44,7 +44,7 @@ jobs:
         if: env.SONAR_TOKEN != ''
         run: |
           dotnet tool install --global dotnet-sonarscanner
-          dotnet sonarscanner begin /k:"GabrielaQuinteros_sgv-comercial" /o:"gabrielaquinteros" /d:sonar.token="$SONAR_TOKEN" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="tests/SGV.Tests/TestResults/**/coverage.opencover.xml" /d:sonar.javascript.lcov.reportPaths="frontend/coverage/lcov.info" /d:sonar.exclusions="**/node_modules/**,**/dist/**,**/bin/**,**/obj/**" /d:sonar.projectVersion="0.1.0"
+          dotnet sonarscanner begin /k:"GabrielaQuinteros_sgv-comercial" /o:"gabrielaquinteros" /v:"0.1.0" /d:sonar.token="$SONAR_TOKEN" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="tests/SGV.Tests/TestResults/**/coverage.opencover.xml" /d:sonar.javascript.lcov.reportPaths="frontend/coverage/lcov.info" /d:sonar.exclusions="**/node_modules/**,**/dist/**,**/bin/**,**/obj/**"
       - name: Compilar
         run: dotnet build tests/SGV.Tests/SGV.Tests.csproj --configuration Release
       - name: Pruebas unitarias y SQL Server
