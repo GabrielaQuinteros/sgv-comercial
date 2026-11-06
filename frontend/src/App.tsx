@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { PaymentForm } from "./components/PaymentForm";
 import {
   calculateCart,
   currency,
@@ -459,12 +460,14 @@ export function App() {
                         <td>{currency(item.product.price * item.quantity)}</td>
                         <td>
                           <button
+                            type="button"
                             className="text-button"
-                            onClick={() =>
+                            onClick={() => {
                               setCart((items) =>
                                 items.filter((row) => row !== item),
-                              )
-                            }
+                              );
+                              setSale(null);
+                            }}
                             aria-label={`Quitar ${item.product.name}`}
                           >
                             ×
@@ -496,7 +499,7 @@ export function App() {
                 </div>
                 <button
                   className="primary full"
-                  disabled={busy || cart.length === 0}
+                  disabled={busy || cart.length === 0 || sale !== null}
                   onClick={() =>
                     void run(async () => {
                       const result = await request<Sale>(
@@ -522,6 +525,18 @@ export function App() {
                     <strong>{sale.status}</strong>
                     <p>Venta: {sale.id}</p>
                     <p>Total confirmado: {currency(sale.total)}</p>
+                    {sale.status === "Pendiente" && (
+                      <PaymentForm
+                        saleId={sale.id}
+                        amount={sale.total}
+                        token={session.accessToken}
+                        onPaid={() => {
+                          setSale({ ...sale, status: "Pagada" });
+                          setRevision((value) => value + 1);
+                          setMessage("Pago registrado correctamente.");
+                        }}
+                      />
+                    )}
                   </div>
                 )}
               </section>

@@ -86,6 +86,7 @@ api.MapPost("/inventory/entries", async (StockEntry input, ClaimsPrincipal user,
     return Results.NoContent();
 }).RequireAuthorization("Inventario");
 api.MapPost("/sales", async (SaleInput input, ClaimsPrincipal user, CommercialStore store, CancellationToken cancellation) => Results.Ok(await store.CreateSaleAsync(input, user.Identity!.Name!, cancellation))).RequireAuthorization("Ventas");
+api.MapPost("/sales/{id:guid}/payments", async (Guid id, PaymentInput input, ClaimsPrincipal user, CommercialStore store, CancellationToken cancellation) => Results.Ok(await store.RecordPaymentAsync(id, input, user.Identity!.Name!, cancellation))).RequireAuthorization("Ventas");
 api.MapGet("/audit", (DateTimeOffset from, DateTimeOffset to, CommercialStore store, CancellationToken cancellation) => store.AuditEventsAsync(from, to, cancellation)).RequireAuthorization("Auditoria");
 api.MapPost("/users", async (UserInput input, ClaimsPrincipal user, CommercialStore store, CancellationToken cancellation) => Results.Created("/api/users", new { id = await store.CreateUserAsync(input, user.Identity!.Name!, cancellation) })).RequireAuthorization("Admin");
 api.MapPost("/dte/sign", async (DteSignInput input, IHttpClientFactory clients, CancellationToken cancellation) =>
