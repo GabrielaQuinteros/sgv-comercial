@@ -4,6 +4,7 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<DocumentSigner>();
+builder.Services.AddSingleton<IClock, NtpClock>();
 builder.Services.AddHttpClient<DocumentDelivery>(client =>
 {
     client.Timeout = TimeSpan.FromSeconds(15);
@@ -26,9 +27,9 @@ app.Use(async (context, next) =>
     await next(context);
 });
 app.MapGet("/health", () => Results.Ok(new { service = "SGV.Dte", status = "ok" }));
-app.MapPost("/api/dte/sign", (DteInput input, DocumentSigner signer) =>
+app.MapPost("/api/dte/sign", async (DteInput input, DocumentSigner signer, CancellationToken cancellation) =>
 {
-    try { return Results.Ok(signer.Sign(input)); }
+    try { return Results.Ok(await signer.SignAsync(input, cancellation)); }
     catch (ArgumentException exception) { return Results.Problem(statusCode: 400, detail: exception.Message); }
     catch (InvalidOperationException exception) { return Results.Problem(statusCode: 503, detail: exception.Message); }
 });

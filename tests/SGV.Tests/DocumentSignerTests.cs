@@ -10,7 +10,7 @@ namespace Sgv.Tests;
 public sealed class DocumentSignerTests
 {
     [Fact]
-    public void CreatesVerifiableSignatureWithUniqueDocumentId()
+    public async Task CreatesVerifiableSignatureWithUniqueDocumentId()
     {
         using var rsa = RSA.Create(2048);
         var request = new CertificateRequest("CN=SGV Signing Test", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pss);
@@ -24,12 +24,14 @@ public sealed class DocumentSignerTests
             {
                 ["DTE_CERTIFICATE_PATH"] = path, ["DTE_CERTIFICATE_PASSWORD"] = password
             }).Build();
-            var signer = new DocumentSigner(config);
+            var now = DateTimeOffset.UtcNow;
+            var signer = new DocumentSigner(config, new FixedClock(now));
             var input = new DteInput(Guid.NewGuid(), 113m, "USD");
-            var first = signer.Sign(input);
-            var second = signer.Sign(input);
+            var first = await signer.SignAsync(input);
+            var second = await signer.SignAsync(input);
             Assert.NotEqual(first.Id, second.Id);
             Assert.Equal(input.SaleId, first.SaleId);
+            Assert.Equal(now, first.IssuedAt);
             Assert.True(rsa.VerifyData(Encoding.UTF8.GetBytes(first.Payload), Convert.FromBase64String(first.Signature), HashAlgorithmName.SHA256, RSASignaturePadding.Pss));
             Assert.False(rsa.VerifyData(Encoding.UTF8.GetBytes(first.Payload + "changed"), Convert.FromBase64String(first.Signature), HashAlgorithmName.SHA256, RSASignaturePadding.Pss));
         }
@@ -37,12 +39,17 @@ public sealed class DocumentSignerTests
     }
 
     [Fact]
-    public void RejectsInvalidDocumentsAndMissingCertificate()
+    public async Task RejectsInvalidDocumentsAndMissingCertificate()
     {
-        var signer = new DocumentSigner(new ConfigurationBuilder().Build());
-        Assert.Throws<ArgumentException>(() => signer.Sign(new DteInput(Guid.Empty, 10m, "USD")));
-        Assert.Throws<ArgumentException>(() => signer.Sign(new DteInput(Guid.NewGuid(), -1m, "USD")));
-        Assert.Throws<ArgumentException>(() => signer.Sign(new DteInput(Guid.NewGuid(), 10m, "EUR")));
-        Assert.Throws<InvalidOperationException>(() => signer.Sign(new DteInput(Guid.NewGuid(), 10m, "USD")));
+        var signer = new DocumentSigner(new ConfigurationBuilder().Build(), new FixedClock(DateTimeOffset.UtcNow));
+        await Assert.ThrowsAsync<ArgumentException>(() => signer.SignAsync(new DteInput(Guid.Empty, 10m, "USD")));
+        await Assert.ThrowsAsync<ArgumentException>(() => signer.SignAsync(new DteInput(Guid.NewGuid(), -1m, "USD")));
+        await Assert.ThrowsAsync<ArgumentException>(() => signer.SignAsync(new DteInput(Guid.NewGuid(), 10m, "EUR")));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => signer.SignAsync(new DteInput(Guid.NewGuid(), 10m, "USD")));
+    }
+
+    private sealed class FixedClock(DateTimeOffset now) : IClock
+    {
+        public Task<DateTimeOffset> UtcNowAsync(CancellationToken cancellation) => Task.FromResult(now);
     }
 }
