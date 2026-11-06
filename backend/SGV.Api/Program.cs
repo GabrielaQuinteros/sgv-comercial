@@ -68,9 +68,8 @@ app.MapGet("/health", () => Results.Ok(new { service = "SGV.Api", status = "ok" 
 app.MapPost("/api/auth/login", async (LoginInput input, CommercialStore store, TokenService tokens, CancellationToken cancellation) =>
 {
     if (input.Username.Length > 100 || input.Password.Length > 128) return Results.Unauthorized();
-    var account = await store.FindUserAsync(input.Username, cancellation);
-    if (account is null || !account.Active || !PasswordHasher.Verify(input.Password, account.PasswordHash)) return Results.Unauthorized();
-    await store.AuditAsync(account.Username, "Inicio de sesión", account.Id.ToString(), "Autenticación correcta", cancellation);
+    var account = await store.AuthenticateAsync(input.Username, input.Password, cancellation);
+    if (account is null) return Results.Unauthorized();
     return Results.Ok(tokens.Create(account));
 }).RequireRateLimiting("login");
 
@@ -86,12 +85,25 @@ api.MapPost("/inventory/entries", async (StockEntry input, ClaimsPrincipal user,
 api.MapPost("/sales", async (SaleInput input, ClaimsPrincipal user, CommercialStore store, CancellationToken cancellation) => Results.Ok(await store.CreateSaleAsync(input, user.Identity!.Name!, cancellation))).RequireAuthorization("Ventas");
 api.MapPost("/sales/{id:guid}/payments", async (Guid id, PaymentInput input, ClaimsPrincipal user, CommercialStore store, CancellationToken cancellation) => Results.Ok(await store.RecordPaymentAsync(id, input, user.Identity!.Name!, cancellation))).RequireAuthorization("Ventas");
 api.MapGet("/audit", (DateTimeOffset from, DateTimeOffset to, CommercialStore store, CancellationToken cancellation) => store.AuditEventsAsync(from, to, cancellation)).RequireAuthorization("Auditoria");
+api.MapGet("/audit/export", async (DateTimeOffset from, DateTimeOffset to, CommercialStore store, CancellationToken cancellation) =>
+{
+    var events = await store.AuditEventsAsync(from, to, cancellation);
+    return Results.File(AuditCsv.Export(events), "text/csv; charset=utf-8", $"bitacora-{from:yyyyMMdd}-{to:yyyyMMdd}.csv");
+}).RequireAuthorization("Auditoria");
 api.MapPost("/users", async (UserInput input, ClaimsPrincipal user, CommercialStore store, CancellationToken cancellation) => Results.Created("/api/users", new { id = await store.CreateUserAsync(input, user.Identity!.Name!, cancellation) })).RequireAuthorization("Admin");
 api.MapPost("/dte/sign", async (DteSignInput input, IHttpClientFactory clients, CancellationToken cancellation) =>
 {
     using var response = await clients.CreateClient("dte").PostAsJsonAsync("/api/dte/sign", input, cancellation);
     var document = await response.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>(cancellation);
     return Results.Json(document, statusCode: (int)response.StatusCode);
+}).RequireAuthorization("Ventas");
+api.MapPost("/dte/submit", async (System.Text.Json.JsonElement document, ClaimsPrincipal user, CommercialStore store, IHttpClientFactory clients, CancellationToken cancellation) =>
+{
+    using var response = await clients.CreateClient("dte").PostAsJsonAsync("/api/dte/submit", document, cancellation);
+    var receipt = await response.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>(cancellation);
+    if (response.IsSuccessStatusCode)
+        await store.AuditAsync(user.Identity!.Name!, "DTE enviado", document.GetProperty("id").GetString() ?? "", "Recepción confirmada por la pasarela configurada", cancellation);
+    return Results.Json(receipt, statusCode: (int)response.StatusCode);
 }).RequireAuthorization("Ventas");
 
 await app.Services.GetRequiredService<CommercialStore>().EnsureAdminAsync(

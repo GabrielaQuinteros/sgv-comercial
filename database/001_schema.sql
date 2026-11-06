@@ -6,8 +6,15 @@ CREATE TABLE dbo.Users (
     Username NVARCHAR(100) NOT NULL UNIQUE,
     PasswordHash VARCHAR(256) NOT NULL,
     Role VARCHAR(20) NOT NULL CHECK (Role IN ('Admin','Ventas','Inventario','Auditor')),
-    Active BIT NOT NULL DEFAULT 1
+    Active BIT NOT NULL DEFAULT 1,
+    FailedAttempts INT NOT NULL DEFAULT 0,
+    LockedUntil DATETIMEOFFSET NULL
 );
+GO
+IF COL_LENGTH('dbo.Users', 'FailedAttempts') IS NULL
+    ALTER TABLE dbo.Users ADD FailedAttempts INT NOT NULL DEFAULT 0;
+IF COL_LENGTH('dbo.Users', 'LockedUntil') IS NULL
+    ALTER TABLE dbo.Users ADD LockedUntil DATETIMEOFFSET NULL;
 GO
 IF OBJECT_ID('dbo.Products', 'U') IS NULL
 CREATE TABLE dbo.Products (
@@ -68,6 +75,13 @@ BEGIN
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
     IF @Quantity <= 0 THROW 50001, 'Cantidad inválida.', 1;
+    IF @@TRANCOUNT = 0 THROW 50002, 'El descuento requiere una transacción explícita.', 1;
+    DECLARE @Available INT;
+    SELECT @Available = Stock
+    FROM dbo.Products WITH (UPDLOCK, HOLDLOCK, ROWLOCK)
+    WHERE Id = @ProductId;
+    IF @Available IS NULL OR @Available < @Quantity
+        THROW 50001, 'Existencias insuficientes.', 1;
     UPDATE dbo.Products SET Stock = Stock - @Quantity WHERE Id = @ProductId AND Stock >= @Quantity;
     IF @@ROWCOUNT <> 1 THROW 50001, 'Existencias insuficientes.', 1;
 END;
