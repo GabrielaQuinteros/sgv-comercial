@@ -6,8 +6,15 @@ CREATE TABLE dbo.Users (
     Username NVARCHAR(100) NOT NULL UNIQUE,
     PasswordHash VARCHAR(256) NOT NULL,
     Role VARCHAR(20) NOT NULL CHECK (Role IN ('Admin','Ventas','Inventario','Auditor')),
-    Active BIT NOT NULL DEFAULT 1
+    Active BIT NOT NULL DEFAULT 1,
+    FailedAttempts INT NOT NULL DEFAULT 0,
+    LockedUntil DATETIMEOFFSET NULL
 );
+GO
+IF COL_LENGTH('dbo.Users', 'FailedAttempts') IS NULL
+    ALTER TABLE dbo.Users ADD FailedAttempts INT NOT NULL DEFAULT 0;
+IF COL_LENGTH('dbo.Users', 'LockedUntil') IS NULL
+    ALTER TABLE dbo.Users ADD LockedUntil DATETIMEOFFSET NULL;
 GO
 IF OBJECT_ID('dbo.Products', 'U') IS NULL
 CREATE TABLE dbo.Products (

@@ -34,3 +34,9 @@ En despliegues remotos habilita TLS y valida el certificado de SQL Server. Publi
 No se incluyen certificados, claves JWT, credenciales ni tokens en el repositorio. `.env.example` contiene los nombres de configuración. El certificado tributario y la URL de la autoridad deben corresponder al ambiente autorizado para la organización.
 
 La firma criptográfica no equivale por sí sola a la aceptación fiscal: la respuesta de la autoridad tributaria debe conservarse como evidencia de recepción.
+
+## Envío DTE · SGV-38
+
+`POST /api/dte/submit` recibe el documento firmado obtenido de `/api/dte/sign`. La API autentica el rol de Ventas y comunica la solicitud al servicio DTE. Este servicio envía el documento a la URL HTTPS configurada en `DTE_AUTHORITY_URL`, usando `DTE_AUTHORITY_TOKEN` y el UUID como clave de idempotencia. La respuesta conserva el código HTTP y el contenido devuelto por la pasarela.
+
+Los errores de la pasarela se devuelven como 502 y la falta de configuración como 503. No se registra recepción correcta sin una respuesta HTTP satisfactoria. La integración requiere que la pasarela de la organización acepte el contrato `SignedDocument` o lo adapte al formato tributario correspondiente.
