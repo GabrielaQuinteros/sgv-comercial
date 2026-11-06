@@ -129,6 +129,11 @@ it("opera inventario, auditoría, firma y cierre de sesión", async () => {
   });
   fireEvent.click(screen.getByRole("button", { name: "Registrar entrada" }));
   await screen.findByText("Entrada registrada correctamente.");
+  expect(request).toHaveBeenCalledWith("/inventory/entries", "session", {
+    productId: 1,
+    quantity: 3,
+    reference: "REC-001",
+  });
   fireEvent.click(
     screen.getByRole("button", { name: "Auditoría" }),
   );
@@ -153,8 +158,14 @@ it("opera inventario, auditoría, firma y cierre de sesión", async () => {
   });
   fireEvent.click(screen.getByRole("button", { name: "Generar y firmar" }));
   await screen.findByText("Documento firmado: document-001");
+  expect(request).toHaveBeenCalledWith("/dte/sign", "session", {
+    saleId: sale.id,
+    total: 113,
+    currency: "USD",
+  });
   fireEvent.click(screen.getByRole("button", { name: "Cerrar sesión" }));
   await screen.findByRole("heading", { name: "Iniciar sesión" });
+  expect(screen.getByRole("heading", { name: "Iniciar sesión" })).toBeTruthy();
 });
 
 it("muestra un error de autenticación sin abrir una sesión", async () => {
