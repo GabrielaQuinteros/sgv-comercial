@@ -28,7 +28,8 @@ public sealed partial class CommercialStore(string connectionString)
     public async Task EnsureAdminAsync(string username, string password, CancellationToken cancellation)
     {
         await using var connection = await OpenAsync(cancellation);
-        await using var count = new SqlCommand("SELECT COUNT(*) FROM dbo.Users", connection);
+        await using var count = new SqlCommand("SELECT COUNT(*) FROM dbo.Users WHERE Username=@username", connection);
+        Parameter(count, "@username", username.Trim().ToLowerInvariant());
         if (Convert.ToInt32(await count.ExecuteScalarAsync(cancellation), CultureInfo.InvariantCulture) > 0) return;
         await using var command = new SqlCommand("INSERT dbo.Users(Id, Username, PasswordHash, Role) VALUES(@id,@username,@hash,'Admin')", connection);
         Parameter(command, "@id", Guid.NewGuid());
