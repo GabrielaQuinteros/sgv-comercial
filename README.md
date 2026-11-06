@@ -52,7 +52,7 @@ dotnet run --project backend/SGV.Api --urls http://localhost:5080
 dotnet run --project dte-service/SGV.Dte --urls http://localhost:5081
 ```
 
-En otra terminal, desde `frontend/`:
+En otra terminal, desde la raíz del repositorio:
 
 ```bash
 npm ci
@@ -69,7 +69,7 @@ dotnet test tests/SGV.Tests/SGV.Tests.csproj
 
 Las pruebas SQL se ejecutan cuando `SGV_TEST_SQL` apunta a una instancia SQL Server con permisos para crear una base de pruebas. Sin esa variable, xUnit las informa como omitidas. GitHub Actions prepara SQL Server y ejecuta esas pruebas con una base independiente.
 
-Desde `frontend/`:
+Desde la raíz del repositorio:
 
 ```bash
 npm run build
