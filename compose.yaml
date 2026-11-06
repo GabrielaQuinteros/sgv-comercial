@@ -24,6 +24,7 @@ services:
       start_period: 20s
   setup:
     profiles: [tools]
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
     build:
       context: .
       dockerfile: Dockerfile.dotnet
@@ -83,7 +84,7 @@ services:
     depends_on: [dte]
   frontend:
     build: { context: ., dockerfile: frontend/Dockerfile }
-    ports: ["127.0.0.1:5173:80"]
+    ports: ["127.0.0.1:5173:8080"]
     depends_on: [api]
 volumes:
   sql-data:

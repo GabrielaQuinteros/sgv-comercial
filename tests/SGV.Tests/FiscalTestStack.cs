@@ -42,6 +42,11 @@ public sealed class FiscalTestStack : IAsyncDisposable
     private readonly WebApplicationFactory<Program> api;
     public HttpClient Client { get; }
     public HttpClient ReceiverClient { get; }
+    public string Sign(string json)
+    {
+        using var key=JwsDocuments.LoadPrivate(certificate.PrivatePath,certificate.Password);
+        return JwsDocuments.Sign(json,key);
+    }
     public string ServiceKey { get; } = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
     public FiscalRepository Repository { get; }
 

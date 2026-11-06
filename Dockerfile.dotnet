@@ -13,4 +13,5 @@ COPY --from=build /publish ./
 ARG ASSEMBLY
 ENV APP_DLL=$ASSEMBLY
 ENV ASPNETCORE_URLS=http://+:8080
+USER app
 ENTRYPOINT ["/bin/sh", "-c", "exec dotnet \"$APP_DLL\" \"$@\"", "--"]

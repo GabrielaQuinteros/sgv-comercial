@@ -7,7 +7,7 @@ namespace Sgv.Api.Fiscal;
 
 public sealed class FiscalService(FiscalRepository repository,IFiscalClient client,IConfiguration configuration,ILogger<FiscalService> logger)
 {
-    public async Task<DteRecord> EmitAsync(Guid saleId,string actor,CancellationToken cancellation=default,Guid? originalId=null)
+    public async Task<DteRecord> EmitAsync(Guid saleId,string actor,Guid? originalId=null,CancellationToken cancellation=default)
     {
         var establishment=configuration["Fiscal:Establecimiento"]??"M001P001";
         if(establishment.Length!=8||establishment.Any(c=>!char.IsAsciiLetterUpper(c)&&!char.IsAsciiDigit(c))) throw new BusinessException("Establecimiento fiscal inválido.");
@@ -55,7 +55,7 @@ public sealed class FiscalService(FiscalRepository repository,IFiscalClient clie
     public async Task<DteRecord> CreditNoteAsync(Guid originalId,string actor,CancellationToken cancellation=default)
     {
         var original=await RequiredAsync(originalId,cancellation);
-        return await EmitAsync(original.VentaId,actor,cancellation,originalId);
+        return await EmitAsync(original.VentaId,actor,originalId,cancellation);
     }
 
     public async Task<DteRecord> InvalidateAsync(Guid id,string reason,string actor,CancellationToken cancellation=default)

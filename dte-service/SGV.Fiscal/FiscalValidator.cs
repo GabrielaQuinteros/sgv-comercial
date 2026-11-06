@@ -11,7 +11,7 @@ public static partial class FiscalValidator
     [GeneratedRegex(@"^DTE-(01|03|05)-[A-Z0-9]{8}-[0-9]{15}$", RegexOptions.CultureInvariant, 1000)] private static partial Regex ControlPattern();
     public static bool IsNit(string value) => NitPattern().IsMatch(value);
     public static bool IsNrc(string value) => NrcPattern().IsMatch(value);
-    public static bool IsUuid(string value) => Guid.TryParseExact(value, "D", out _) && value == value.ToUpperInvariant() && value[14] == '4' && "89AB".Contains(value[19], StringComparison.Ordinal);
+    public static bool IsUuid(string value) => Guid.TryParseExact(value, "D", out _) && !value.Any(char.IsAsciiLetterLower) && value[14] == '4' && "89AB".Contains(value[19], StringComparison.Ordinal);
     public static string Text(JsonNode? node) => node is JsonValue v && v.TryGetValue<string>(out var text) ? text : "";
     public static decimal Number(JsonNode? node) => decimal.TryParse(node?.ToJsonString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var number) ? number : decimal.MinValue;
 

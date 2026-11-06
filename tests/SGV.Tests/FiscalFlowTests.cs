@@ -92,6 +92,29 @@ public sealed class FiscalFlowTests(SqlFixture database)
         var notFound = await stack.Client.GetAsync("/api/dte/" + Guid.NewGuid()); Assert.Equal(HttpStatusCode.NotFound, notFound.StatusCode);
         var retryRejected = await stack.Client.PostAsJsonAsync($"/api/dte/{doc.Id}/reenviar", new { }); Assert.Equal(HttpStatusCode.Conflict, retryRejected.StatusCode);
     }
+    [SqlFact]
+    public async Task ListsPaidSalesProtectsEmissionAndChecksReceiptIdempotency()
+    {
+        await using var stack=new FiscalTestStack(database);
+        var sale=await FiscalTestStack.PaidSaleAsync(database);
+        Assert.Equal(HttpStatusCode.Unauthorized,(await stack.Client.PostAsJsonAsync($"/api/ventas/{sale}/dte",new{})).StatusCode);
+        await stack.LoginAsync(database);
+        var paid=await stack.Client.GetFromJsonAsync<PaidSale[]>("/api/facturacion/ventas");Assert.Contains(paid!,row=>row.Id==sale);
+        Assert.Equal(HttpStatusCode.NotFound,(await stack.Client.GetAsync("/api/consulta/dte/"+Guid.NewGuid().ToString("D").ToUpperInvariant())).StatusCode);
+        var doc=await EmitAsync(stack,sale);Assert.Equal("PROCESADO",doc.Estado);
+        var latest=await stack.Client.GetFromJsonAsync<DteRecord>($"/api/ventas/{sale}/dte");Assert.Equal(doc.Id,latest!.Id);
+        stack.ReceiverClient.DefaultRequestHeaders.Add("X-Service-Key",stack.ServiceKey);
+        var envelope=new ReceptionRequest("00",2,1,"01",doc.Jws!,doc.CodigoGeneracion);
+        using var repeated=await stack.ReceiverClient.PostAsJsonAsync("/api/receptor-pruebas/recepciondte",envelope);
+        var receipt=await repeated.Content.ReadFromJsonAsync<FiscalResponse>();Assert.Equal(doc.SelloRecibido,receipt!.SelloRecibido);
+        var changed=System.Text.Json.Nodes.JsonNode.Parse(doc.Json!)!;changed["receptor"]!["nombre"]="Otro contenido";
+        using var conflict=await stack.ReceiverClient.PostAsJsonAsync("/api/receptor-pruebas/recepciondte",envelope with {Documento=stack.Sign(changed.ToJsonString())});
+        Assert.Equal("RECHAZADO",(await conflict.Content.ReadFromJsonAsync<FiscalResponse>())!.Estado);
+        using var badSignature=await stack.ReceiverClient.PostAsJsonAsync("/api/receptor-pruebas/recepciondte",envelope with {CodigoGeneracion=Guid.NewGuid().ToString("D").ToUpperInvariant(),Documento="invalid"});
+        Assert.Equal("RECHAZADO",(await badSignature.Content.ReadFromJsonAsync<FiscalResponse>())!.Estado);
+        Assert.Equal(HttpStatusCode.BadRequest,(await stack.Client.GetAsync("/api/dte?tipo=99")).StatusCode);
+        Assert.Equal(HttpStatusCode.Conflict,(await stack.Client.PostAsJsonAsync($"/api/dte/{doc.Id}/nota-credito",new{})).StatusCode);
+    }
     private static Task<DteRecord> EmitAsync(FiscalTestStack stack, Guid sale) => PostAsync(stack, $"/api/ventas/{sale}/dte", new { });
     private static async Task<DteRecord> PostAsync<T>(FiscalTestStack stack, string path, T body)
     {
