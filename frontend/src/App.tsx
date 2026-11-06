@@ -164,7 +164,7 @@ export function App() {
                   {message}
                 </p>
               )}
-              <button disabled={busy} className="primary">
+              <button type="submit" disabled={busy} className="primary">
                 {busy ? "Verificando…" : "Entrar a la plataforma →"}
               </button>
             </form>
@@ -392,7 +392,7 @@ export function App() {
                     Referencia
                     <input name="reference" maxLength={100} required />
                   </label>
-                  <button className="primary" disabled={busy}>
+                  <button type="submit" className="primary" disabled={busy}>
                     Registrar entrada
                   </button>
                 </form>
@@ -441,7 +441,7 @@ export function App() {
                       required
                     />
                   </label>
-                  <button className="secondary">Añadir</button>
+                  <button type="submit" className="secondary">Añadir</button>
                 </form>
                 <table>
                   <thead>
@@ -576,7 +576,7 @@ export function App() {
                   Hasta
                   <input type="datetime-local" name="to" required />
                 </label>
-                <button className="primary" disabled={busy}>
+                <button type="submit" className="primary" disabled={busy}>
                   Consultar
                 </button>
               </form>
@@ -654,7 +654,7 @@ export function App() {
                     required
                   />
                 </label>
-                <button className="primary" disabled={busy}>
+                <button type="submit" className="primary" disabled={busy}>
                   Generar y firmar
                 </button>
               </form>

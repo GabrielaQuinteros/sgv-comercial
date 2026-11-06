@@ -8,6 +8,7 @@ namespace Sgv.Api.Data;
 
 public sealed partial class CommercialStore(string connectionString)
 {
+    private static readonly string[] UserRoles = ["Admin", "Ventas", "Inventario", "Auditor"];
     private async Task<SqlConnection> OpenAsync(CancellationToken cancellation)
     {
         var connection = new SqlConnection(connectionString);
@@ -50,7 +51,7 @@ public sealed partial class CommercialStore(string connectionString)
 
     public async Task<Guid> CreateUserAsync(UserInput input, string actor, CancellationToken cancellation)
     {
-        if (input.Username.Trim().Length is < 3 or > 100 || !new[] { "Admin", "Ventas", "Inventario", "Auditor" }.Contains(input.Role))
+        if (input.Username.Trim().Length is < 3 or > 100 || !UserRoles.Contains(input.Role))
             throw new BusinessException("Usuario o rol inválido.");
         if (input.Password.Length is < 14 or > 128) throw new BusinessException("La contraseña debe tener entre 14 y 128 caracteres.");
         var id = Guid.NewGuid();
