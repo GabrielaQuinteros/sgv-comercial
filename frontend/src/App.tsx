@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { PaymentForm } from "./components/PaymentForm";
+import { Facturacion } from "./components/Facturacion";
 import { downloadAudit } from "./lib/download";
 import {
   calculateCart,
@@ -17,13 +18,13 @@ type View =
   | "Ventas"
   | "Inventario"
   | "Auditoría"
-  | "Facturación DTE";
+  | "Facturación electrónica";
 const views: View[] = [
   "Resumen",
   "Ventas",
   "Inventario",
   "Auditoría",
-  "Facturación DTE",
+  "Facturación electrónica",
 ];
 
 export function App() {
@@ -631,56 +632,8 @@ export function App() {
               )}
             </section>
           )}
-          {view === "Facturación DTE" && (
-            <section className="panel">
-              <p className="eyebrow">DOCUMENTOS TRIBUTARIOS ELECTRÓNICOS</p>
-              <h2>Preparar documento firmado</h2>
-              <p className="muted">
-                El servicio utiliza el certificado .P12 configurado por la
-                organización.
-              </p>
-              <form
-                className="inline-form"
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  const data = new FormData(event.currentTarget);
-                  void run(async () => {
-                    const document = await request<{
-                      id: string;
-                      signature: string;
-                    }>("/dte/sign", session.accessToken, {
-                      saleId: data.get("saleId"),
-                      total: Number(data.get("total")),
-                      currency: "USD",
-                    });
-                    setMessage(`Documento firmado: ${document.id}`);
-                  });
-                }}
-              >
-                <label>
-                  Identificador de venta
-                  <input
-                    name="saleId"
-                    required
-                    pattern="[a-fA-F0-9-]{36}"
-                    placeholder="UUID de la venta"
-                  />
-                </label>
-                <label>
-                  Total USD
-                  <input
-                    name="total"
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    required
-                  />
-                </label>
-                <button type="submit" className="primary" disabled={busy}>
-                  Generar y firmar
-                </button>
-              </form>
-            </section>
+          {view === "Facturación electrónica" && (
+            <Facturacion token={session.accessToken} />
           )}
           <footer>
             SGV-Comercial <span>Adventure Works · Equipo Pepsiman</span>

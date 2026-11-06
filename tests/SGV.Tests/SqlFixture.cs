@@ -34,7 +34,7 @@ public sealed class SqlFixture : IAsyncLifetime
         ConnectionString = builder.ConnectionString;
         await using var connection = new SqlConnection(ConnectionString);
         await connection.OpenAsync();
-        foreach (var file in new[] { "schema.sql", "catalog.sql" })
+        foreach (var file in new[] { "schema.sql", "catalog.sql", "fiscal.sql", "sales-seed.sql" })
         {
             var script = await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, file));
             foreach (var batch in Regex.Split(script, @"^\s*GO\s*$", RegexOptions.Multiline | RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1)))

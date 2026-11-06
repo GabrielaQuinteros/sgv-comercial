@@ -5,6 +5,9 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<DocumentSigner>();
 builder.Services.AddSingleton<IClock, NtpClock>();
+builder.Services.AddSingleton<FiscalSigning>();
+builder.Services.AddHttpClient<ReceptionGateway>(client=> { client.Timeout=Timeout.InfiniteTimeSpan; client.MaxResponseContentBufferSize=1_048_576; })
+    .ConfigurePrimaryHttpMessageHandler(()=>new HttpClientHandler { AllowAutoRedirect=false });
 builder.Services.AddHttpClient<DocumentDelivery>(client =>
 {
     client.Timeout = TimeSpan.FromSeconds(15);
@@ -40,4 +43,5 @@ app.MapPost("/api/dte/submit", async (SignedDocument document, DocumentDelivery 
     catch (InvalidOperationException exception) { return Results.Problem(statusCode: 503, detail: exception.Message); }
     catch (HttpRequestException) { return Results.Problem(statusCode: 502, detail: "La pasarela DTE no confirmó la recepción del documento."); }
 });
+app.MapFiscalEndpoints();
 await app.RunAsync();

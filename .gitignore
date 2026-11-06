@@ -18,3 +18,4 @@ certificates/
 .DS_Store
 *.log
 *.tsbuildinfo
+.local/

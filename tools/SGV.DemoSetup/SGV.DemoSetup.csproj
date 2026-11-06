@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType></PropertyGroup>
+  <ItemGroup><PackageReference Include="Microsoft.Data.SqlClient" Version="7.1.1" /></ItemGroup>
+  <ItemGroup><Content Include="../../database/*.sql" Link="database/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" /></ItemGroup>
+</Project>

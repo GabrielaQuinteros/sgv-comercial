@@ -1,1 +1,3 @@
-<Project Sdk="Microsoft.NET.Sdk.Web" />
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup><ProjectReference Include="../SGV.Fiscal/SGV.Fiscal.csproj" /></ItemGroup>
+</Project>

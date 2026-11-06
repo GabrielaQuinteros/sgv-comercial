@@ -8,12 +8,21 @@ using Microsoft.IdentityModel.Tokens;
 using Sgv.Api.Data;
 using Sgv.Api.Domain;
 using Sgv.Api.Security;
+using Sgv.Api.Fiscal;
 
 var builder = WebApplication.CreateBuilder(args);
 var signingKey = builder.Configuration["SGV_JWT_KEY"] ?? throw new InvalidOperationException("Configura SGV_JWT_KEY.");
 if (Encoding.UTF8.GetByteCount(signingKey) < 32) throw new InvalidOperationException("SGV_JWT_KEY debe tener al menos 32 bytes.");
 var connectionString = builder.Configuration.GetConnectionString("Sgv") ?? throw new InvalidOperationException("Configura ConnectionStrings__Sgv.");
 builder.Services.AddSingleton(new CommercialStore(connectionString));
+builder.Services.AddSingleton(new FiscalRepository(connectionString));
+builder.Services.AddScoped<FiscalService>();
+builder.Services.AddHttpClient<IFiscalClient,FiscalClient>(client=>
+{
+    client.BaseAddress=new Uri(builder.Configuration["Services:DteUrl"]??"http://localhost:5081/");
+    client.Timeout=TimeSpan.FromSeconds(25);
+    client.DefaultRequestHeaders.Add("X-Service-Key",builder.Configuration["DTE_SERVICE_KEY"]);
+});
 builder.Services.AddSingleton(new TokenService(signingKey));
 builder.Services.AddHttpClient("dte", client =>
 {
@@ -106,6 +115,7 @@ api.MapPost("/dte/submit", async (System.Text.Json.JsonElement document, ClaimsP
     return Results.Json(receipt, statusCode: (int)response.StatusCode);
 }).RequireAuthorization("Ventas");
 
+app.MapBilling();
 await app.Services.GetRequiredService<CommercialStore>().EnsureAdminAsync(
     builder.Configuration["SGV_ADMIN_USERNAME"] ?? "admin",
     builder.Configuration["SGV_ADMIN_PASSWORD"] ?? throw new InvalidOperationException("Configura SGV_ADMIN_PASSWORD para el alta inicial."),
