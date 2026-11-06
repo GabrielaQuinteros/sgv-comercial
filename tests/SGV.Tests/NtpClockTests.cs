@@ -9,6 +9,7 @@ namespace Sgv.Tests;
 
 public sealed class NtpClockTests
 {
+    private static readonly int[] TimestampOffsets = [32, 40];
     [Fact]
     public async Task UsesNetworkTimeAndValidatesResponseOrigin()
     {
@@ -52,7 +53,7 @@ public sealed class NtpClockTests
             var response = new byte[48]; response[0] = 0x24; response[1] = 1;
             request.Buffer.AsSpan(40, 8).CopyTo(response.AsSpan(24, 8));
             var seconds = (DateTimeOffset.UtcNow + offset - new DateTimeOffset(1900, 1, 1, 0, 0, 0, TimeSpan.Zero)).TotalSeconds;
-            foreach (var start in new[] { 32, 40 })
+            foreach (var start in TimestampOffsets)
             {
                 BinaryPrimitives.WriteUInt32BigEndian(response.AsSpan(start, 4), (uint)seconds);
                 BinaryPrimitives.WriteUInt32BigEndian(response.AsSpan(start + 4, 4), (uint)((seconds - Math.Floor(seconds)) * 4_294_967_296d));
