@@ -12,6 +12,7 @@ public sealed record LoginInput(string Username, string Password);
 public sealed record UserInput(string Username, string Password, string Role);
 public sealed record AuditEvent(long Id, DateTimeOffset CreatedAt, string Actor, string Action, string EntityId, string Detail);
 public sealed record Dashboard(int Products, int LowStockProducts, int Sales, decimal Revenue);
+public sealed record DteSignInput(Guid SaleId, decimal Total, string Currency);
 
 public sealed class BusinessException(string message, int statusCode = 400) : Exception(message)
 {

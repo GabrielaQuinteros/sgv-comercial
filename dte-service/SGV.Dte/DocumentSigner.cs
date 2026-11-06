@@ -24,7 +24,7 @@ public sealed class DocumentSigner(IConfiguration configuration, IClock clock)
         using var rsa = certificate.GetRSAPrivateKey() ?? throw new InvalidOperationException("El certificado debe contener una clave RSA privada.");
         var id = Guid.NewGuid();
         var payload = JsonSerializer.Serialize(new { id, input.SaleId, input.Total, input.Currency, issuedAt = now });
-        var signature = rsa.SignData(Encoding.UTF8.GetBytes(payload), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+        var signature = rsa.SignData(Encoding.UTF8.GetBytes(payload), HashAlgorithmName.SHA256, RSASignaturePadding.Pss);
         return new SignedDocument(id, input.SaleId, now, payload, Convert.ToBase64String(signature), certificate.Thumbprint);
     }
 }
