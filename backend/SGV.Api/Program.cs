@@ -84,6 +84,11 @@ api.MapPost("/inventory/entries", async (StockEntry input, ClaimsPrincipal user,
 }).RequireAuthorization("Inventario");
 api.MapPost("/sales", async (SaleInput input, ClaimsPrincipal user, CommercialStore store, CancellationToken cancellation) => Results.Ok(await store.CreateSaleAsync(input, user.Identity!.Name!, cancellation))).RequireAuthorization("Ventas");
 api.MapGet("/audit", (DateTimeOffset from, DateTimeOffset to, CommercialStore store, CancellationToken cancellation) => store.AuditEventsAsync(from, to, cancellation)).RequireAuthorization("Auditoria");
+api.MapGet("/audit/export", async (DateTimeOffset from, DateTimeOffset to, CommercialStore store, CancellationToken cancellation) =>
+{
+    var events = await store.AuditEventsAsync(from, to, cancellation);
+    return Results.File(AuditCsv.Export(events), "text/csv; charset=utf-8", $"bitacora-{from:yyyyMMdd}-{to:yyyyMMdd}.csv");
+}).RequireAuthorization("Auditoria");
 api.MapPost("/users", async (UserInput input, ClaimsPrincipal user, CommercialStore store, CancellationToken cancellation) => Results.Created("/api/users", new { id = await store.CreateUserAsync(input, user.Identity!.Name!, cancellation) })).RequireAuthorization("Admin");
 api.MapPost("/dte/sign", async (DteSignInput input, IHttpClientFactory clients, CancellationToken cancellation) =>
 {
