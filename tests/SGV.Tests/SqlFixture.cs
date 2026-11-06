@@ -17,6 +17,7 @@ public sealed class SqlFactAttribute : FactAttribute
 public sealed class SqlFixture : IAsyncLifetime
 {
     public string? ConnectionString { get; private set; }
+    public string AdminPassword { get; } = Guid.NewGuid().ToString("N");
     public CommercialStore Store => new(ConnectionString ?? throw new InvalidOperationException("SQL Server no configurado."));
 
     public async Task InitializeAsync()

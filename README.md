@@ -4,13 +4,13 @@ Sistema de Gestión Comercial de Adventure Works: ventas, inventario, facturaci�
 
 ## Equipo
 
-| Integrante | Rol |
-|---|---|
-| Gabriela Sofía Quinteros Ramírez | Scrum Master |
-| Oscar Ernesto Menjívar Ayala | Product Owner |
-| Joel Mauricio Barrera Zepeda | QA |
-| Fabio Alberto Mijango Serrano | Seguridad |
-| Miguel Andreé Torres Campos | Gestión de Riesgos |
+| Integrante                       | Rol                |
+| -------------------------------- | ------------------ |
+| Gabriela Sofía Quinteros Ramírez | Scrum Master       |
+| Oscar Ernesto Menjívar Ayala     | Product Owner      |
+| Joel Mauricio Barrera Zepeda     | QA                 |
+| Fabio Alberto Mijango Serrano    | Seguridad          |
+| Miguel Andreé Torres Campos      | Gestión de Riesgos |
 
 ## Arquitectura
 
@@ -36,16 +36,16 @@ El frontend consulta la API autenticada. La API utiliza SQL Server y se comunica
 
 Configura las variables del proceso antes de ejecutar los servicios:
 
-| Variable | Uso |
-|---|---|
-| `ConnectionStrings__Sgv` | Cadena de conexión a la base SQL Server |
-| `SGV_JWT_KEY` | Clave aleatoria de al menos 32 bytes |
-| `SGV_ADMIN_USERNAME` | Nombre del administrador inicial |
-| `SGV_ADMIN_PASSWORD` | Contraseña inicial de 14 a 128 caracteres |
-| `DTE_SERVICE_KEY` | Credencial compartida API/DTE de al menos 32 caracteres |
-| `Services__DteUrl` | URL interna del servicio DTE; local: `http://localhost:5081` |
-| `DTE_CERTIFICATE_PATH` | Ruta externa al certificado .P12 |
-| `DTE_CERTIFICATE_PASSWORD` | Contraseña del certificado |
+| Variable                   | Uso                                                          |
+| -------------------------- | ------------------------------------------------------------ |
+| `ConnectionStrings__Sgv`   | Cadena de conexión a la base SQL Server                      |
+| `SGV_JWT_KEY`              | Clave aleatoria de al menos 32 bytes                         |
+| `SGV_ADMIN_USERNAME`       | Nombre del administrador inicial                             |
+| `SGV_ADMIN_PASSWORD`       | Contraseña inicial de 14 a 128 caracteres                    |
+| `DTE_SERVICE_KEY`          | Credencial compartida API/DTE de al menos 32 caracteres      |
+| `Services__DteUrl`         | URL interna del servicio DTE; local: `http://localhost:5081` |
+| `DTE_CERTIFICATE_PATH`     | Ruta externa al certificado .P12                             |
+| `DTE_CERTIFICATE_PASSWORD` | Contraseña del certificado                                   |
 
 ```bash
 dotnet run --project backend/SGV.Api --urls http://localhost:5080

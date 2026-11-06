@@ -10,18 +10,18 @@
 
 ## API principal
 
-| Método | Ruta | Permiso |
-|---|---|---|
-| GET | `/health` | Público |
-| POST | `/api/auth/login` | Credenciales |
-| GET | `/api/products` | Usuario autenticado |
-| GET | `/api/dashboard` | Usuario autenticado |
-| POST | `/api/products` | Admin, Inventario |
-| POST | `/api/inventory/entries` | Admin, Inventario |
-| POST | `/api/sales` | Admin, Ventas |
-| GET | `/api/audit?from=...&to=...` | Admin, Auditor |
-| POST | `/api/users` | Admin |
-| POST | `/api/dte/sign` | Admin, Ventas |
+| Método | Ruta                         | Permiso             |
+| ------ | ---------------------------- | ------------------- |
+| GET    | `/health`                    | Público             |
+| POST   | `/api/auth/login`            | Credenciales        |
+| GET    | `/api/products`              | Usuario autenticado |
+| GET    | `/api/dashboard`             | Usuario autenticado |
+| POST   | `/api/products`              | Admin, Inventario   |
+| POST   | `/api/inventory/entries`     | Admin, Inventario   |
+| POST   | `/api/sales`                 | Admin, Ventas       |
+| GET    | `/api/audit?from=...&to=...` | Admin, Auditor      |
+| POST   | `/api/users`                 | Admin               |
+| POST   | `/api/dte/sign`              | Admin, Ventas       |
 
 Los intervalos de auditoría utilizan límites `[desde, hasta)` y no pueden superar 31 días. Los precios provienen del catálogo del servidor: el cliente no puede imponer el precio de la venta.
 

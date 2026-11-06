@@ -18,21 +18,40 @@ jobs:
         env:
           ACCEPT_EULA: Y
           MSSQL_SA_PASSWORD: ${{ secrets.SGV_SQL_TEST_PASSWORD }}
+          SQLCMDPASSWORD: ${{ secrets.SGV_SQL_TEST_PASSWORD }}
         ports: [1433:1433]
         options: >-
-          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '${{ secrets.SGV_SQL_TEST_PASSWORD }}' -C -Q 'SELECT 1'"
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -C -Q 'SELECT 1'"
           --health-interval 10s --health-timeout 5s --health-retries 15
     env:
       SGV_TEST_SQL: Server=localhost,1433;User Id=sa;Password=${{ secrets.SGV_SQL_TEST_PASSWORD }};Encrypt=True;TrustServerCertificate=True
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
       - uses: actions/setup-dotnet@v4
-        with: { dotnet-version: '8.0.x' }
+        with: { dotnet-version: "8.0.x" }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "21" }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Cobertura TypeScript
+        run: npm ci && npm test
+      - name: Preparar análisis de calidad
+        if: env.SONAR_TOKEN != ''
+        run: |
+          dotnet tool install --global dotnet-sonarscanner
+          dotnet sonarscanner begin /k:"GabrielaQuinteros_sgv-comercial" /o:"gabrielaquinteros" /d:sonar.token="$SONAR_TOKEN" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="tests/SGV.Tests/TestResults/**/coverage.opencover.xml" /d:sonar.javascript.lcov.reportPaths="frontend/coverage/lcov.info" /d:sonar.exclusions="**/node_modules/**,**/dist/**,**/bin/**,**/obj/**" /d:sonar.projectVersion="0.1.0"
       - name: Compilar
         run: dotnet build tests/SGV.Tests/SGV.Tests.csproj --configuration Release
       - name: Pruebas unitarias y SQL Server
         run: dotnet test tests/SGV.Tests/SGV.Tests.csproj --configuration Release --no-build --logger trx --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+      - name: Publicar análisis de calidad
+        if: env.SONAR_TOKEN != ''
+        run: dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -47,7 +66,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: "22"
           cache: npm
           cache-dependency-path: package-lock.json
       - run: npm ci
