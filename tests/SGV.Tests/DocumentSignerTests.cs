@@ -13,7 +13,7 @@ public sealed class DocumentSignerTests
     public void CreatesVerifiableSignatureWithUniqueDocumentId()
     {
         using var rsa = RSA.Create(2048);
-        var request = new CertificateRequest("CN=SGV Signing Test", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+        var request = new CertificateRequest("CN=SGV Signing Test", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pss);
         using var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow.AddMinutes(-1), DateTimeOffset.UtcNow.AddDays(1));
         var path = Path.GetTempFileName();
         var password = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
@@ -30,8 +30,8 @@ public sealed class DocumentSignerTests
             var second = signer.Sign(input);
             Assert.NotEqual(first.Id, second.Id);
             Assert.Equal(input.SaleId, first.SaleId);
-            Assert.True(rsa.VerifyData(Encoding.UTF8.GetBytes(first.Payload), Convert.FromBase64String(first.Signature), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
-            Assert.False(rsa.VerifyData(Encoding.UTF8.GetBytes(first.Payload + "changed"), Convert.FromBase64String(first.Signature), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
+            Assert.True(rsa.VerifyData(Encoding.UTF8.GetBytes(first.Payload), Convert.FromBase64String(first.Signature), HashAlgorithmName.SHA256, RSASignaturePadding.Pss));
+            Assert.False(rsa.VerifyData(Encoding.UTF8.GetBytes(first.Payload + "changed"), Convert.FromBase64String(first.Signature), HashAlgorithmName.SHA256, RSASignaturePadding.Pss));
         }
         finally { File.Delete(path); }
     }

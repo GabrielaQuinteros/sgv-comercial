@@ -32,13 +32,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         ClockSkew = TimeSpan.FromSeconds(30)
     };
 });
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("Ventas", policy => policy.RequireRole("Admin", "Ventas"));
-    options.AddPolicy("Inventario", policy => policy.RequireRole("Admin", "Inventario"));
-    options.AddPolicy("Auditoria", policy => policy.RequireRole("Admin", "Auditor"));
-    options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
-});
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("Ventas", policy => policy.RequireRole("Admin", "Ventas"))
+    .AddPolicy("Inventario", policy => policy.RequireRole("Admin", "Inventario"))
+    .AddPolicy("Auditoria", policy => policy.RequireRole("Admin", "Auditor"))
+    .AddPolicy("Admin", policy => policy.RequireRole("Admin"));
 builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy.WithOrigins(builder.Configuration["Cors:AllowedOrigin"] ?? "http://localhost:5173").AllowAnyHeader().AllowAnyMethod()));
 builder.Services.AddRateLimiter(options =>
 {
@@ -57,7 +55,7 @@ app.UseExceptionHandler(error => error.Run(async context =>
 }));
 app.Use(async (context, next) =>
 {
-    context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+    context.Response.Headers.XContentTypeOptions = "nosniff";
     context.Response.Headers["Referrer-Policy"] = "no-referrer";
     await next(context);
 });
@@ -110,5 +108,3 @@ await app.Services.GetRequiredService<CommercialStore>().EnsureAdminAsync(
 await app.RunAsync();
 
 public partial class Program;
-
-public sealed record DteSignInput(Guid SaleId, decimal Total, string Currency);

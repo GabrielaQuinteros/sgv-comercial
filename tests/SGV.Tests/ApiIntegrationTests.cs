@@ -29,6 +29,7 @@ public sealed class ApiIntegrationTests(SqlFixture database)
     public async Task AuthenticatedWorkflowUsesRealDatabaseAndRoleChecks()
     {
         var password = database.AdminPassword;
+        await database.Store.CreateUserAsync(new UserInput("existing-" + Guid.NewGuid().ToString("N"), Guid.NewGuid().ToString("N"), "Auditor"), "qa", default);
         await using var factory = new ApiFactory(database.ConnectionString!, password);
         using var client = factory.CreateClient();
         Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/health")).StatusCode);
